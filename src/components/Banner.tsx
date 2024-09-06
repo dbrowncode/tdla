@@ -4,42 +4,45 @@ import React,  { useState, useEffect } from "react";
  * Banner: pulls an image url from api.nasa.gov and displays the site banner
  */
 const Banner: React.FC = () => {
-    const [imgUrl, setImgUrl] = useState<string | null>(null);
-    const [hdImgUrl, setHdImgUrl] = useState<string | null>(null);
     const [currentImgUrl, setCurrentImgUrl] = useState<string | null>(null);
     const [copyright, setCopyright] = useState<string | null>(null);
+    const backupData = {
+        copyright: "\nMike Taivalmaa\n",
+        url: "img/Bat_Taivalnaa_960.jpg",
+    }
 
     useEffect(() => {
         const fetchImg = async () => {
             const res = await fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY');
-            const data = await res.json();
+            let data = await res.json();
 
-            setImgUrl(data.url);
-            setHdImgUrl(data.hdurl);
-            setCurrentImgUrl(window.innerWidth > 800 ? data.hdurl : data.url);
+            if (res.status !== 200) {
+                // If we hit a rate limit or otherwise bad response, use a backup image.
+                // The APOD image from 20240904 is a good one.
+                data = backupData;
+            }
+
+            setCurrentImgUrl(data.url);
             setCopyright(data.copyright);
         };
 
-        fetchImg();
-
-        const handleResize = () => {
-            const bannerElement = document.querySelector('.banner');
-            bannerElement?.setAttribute('style', `background-image: url(${window.innerWidth > 800? hdImgUrl : imgUrl})`);
-        };
-
-        window.addEventListener('resize', handleResize);
-
-        handleResize();
+        if (!currentImgUrl) // avoid fetching too often - consider caching once daily?
+            fetchImg();
     }, []);
 
     if (!currentImgUrl)
-        return <p>Banner Loading...</p>;
+        return (
+            <div className="banner">
+                <h1>To Do List</h1>
+                <p className="copyright">Banner Loading...</p>
+            </div>
+        );
 
     return (
         <div className="banner" style={{ backgroundImage: `url(${currentImgUrl})` }}>
             <h1>To Do List</h1>
             {copyright && (
-                <p className="copyright">{copyright}©</p>
+                <p className="copyright">{copyright} ©</p>
             )}
         </div>
     );

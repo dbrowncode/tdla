@@ -32,7 +32,7 @@ body {
 .banner h1 {
     font-size: 1.5rem;
     text-align: center;
-    padding: 0 1rem;
+    padding: 0.75rem 1rem;
     background: rgba(0,0,0,0.4);
     border-radius: 16px;
 }
@@ -43,7 +43,7 @@ body {
     right: 5px;
     font-size: .75rem;
     background: rgba(0,0,0,0.4);
-    padding: 2px 4px;
+    padding: 0.25rem 0.5rem;
     border-radius: 16px;
 }
 
@@ -116,6 +116,7 @@ textarea {
     border-radius: 4px;
     background-color: #222;
     color: #e0e0e0;
+    font-family: 'Lucida', sans-serif;
     font-size: 1rem;
     resize: vertical;
 }

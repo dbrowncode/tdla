@@ -21,26 +21,41 @@ import sampleData from "@/sampleData.json";
  * displayComplete - calls displayTodoList with a filtered To Do selection
  */
 export default function Home() {
+  const getMaxId = (todoList?: Todo[]) => {
+    if (typeof todoList === 'undefined')
+      todoList = todos;
+
+    if (!todoList.length)
+      return 0;
+
+    return todoList.reduce((prev, current) => {
+      return (prev && prev.id > current.id) ? prev : current
+    }).id;
+  }
+
   const [todos, setTodos] = useState<Todo[]>(sampleData);
+  const [maxId, setMaxId] = useState<number>(getMaxId);
 
   const AddTodo = (title: string, desc: string) => {
     const newTodo: Todo = {
-      id: todos.length + 1,
+      id: maxId + 1,
       title: title,
       description: desc,
       isCompleted: false,
       isUrgent: false,
     };
 
-    todos.push(newTodo);
-    setTodos(todos);
+    setTodos([...todos, newTodo]);
+    setMaxId(newTodo.id);
   };
 
   const deleteTodo = (id: number) => {
-    setTodos(todos.filter((todo) => todo.id === id));
+    const updatedTodos = todos.filter((todo) => todo.id !== id)
+    setTodos(updatedTodos);
+    setMaxId(getMaxId(updatedTodos));
   };
 
-  const toggleProperty = useCallback((id: number, property: keyof Pick<Todo, 'isCompleted' | 'isUrgent'>) => {
+  const toggleProperty = (id: number, property: keyof Pick<Todo, 'isCompleted' | 'isUrgent'>) => {
     const updatedTodos = todos.map((todo) => {
       if (todo.id === id) {
         todo[property] = !todo[property] as boolean;
@@ -48,31 +63,28 @@ export default function Home() {
       return todo;
     });
     setTodos(updatedTodos);
-  }, [setTodos]);
+  }
 
-  const displayTodoList = (todoList:Todo[]) => {
+  const displayTodoList = (name: string, todoList: Todo[]) => {
     return (
       <TodoList
+        name={name}
         todos={todoList}
-        deleteTodo={deleteTodo} 
-        toggleComplete={(id) => toggleProperty(id, 'isCompleted')} 
-        toggleUrgent={(id) => toggleProperty(id, 'isUrgent')} 
+        deleteTodo={deleteTodo}
+        toggleComplete={(id) => toggleProperty(id, 'isCompleted')}
+        toggleUrgent={(id) => toggleProperty(id, 'isUrgent')}
       />
     );
   };
 
-  const displayTodos = (displayUrgent: boolean) => {
-    return displayTodoList(todos.filter((x) => {
-      if (displayUrgent) {
-        return !x.isCompleted && x.isUrgent === displayUrgent;
-      } else {
-        return !x.isCompleted && x.isUrgent !== displayUrgent;
-      }
+  const displayTodos = (name: string, displayUrgent: boolean) => {
+    return displayTodoList(name, todos.filter((x) => {
+      return !x.isCompleted && (x.isUrgent === displayUrgent);
     }));
   };
 
-  const displayComplete = () => {
-    return displayTodoList(todos.filter((x) => x.isCompleted));
+  const displayComplete = (name: string) => {
+    return displayTodoList(name, todos.filter((x) => x.isCompleted));
   };
 
   return (
@@ -87,9 +99,9 @@ export default function Home() {
       <div className="Home">
         <Banner />
         <AddTodoForm addTodo={AddTodo}/>
-        {displayTodos(true)}
-        {displayTodos(false)}
-        {displayComplete()}
+        {displayTodos("Urgent", true)}
+        {displayTodos("Not urgent", false)}
+        {displayComplete("Complete")}
       </div>
     </>
   );

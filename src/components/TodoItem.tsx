@@ -15,7 +15,7 @@ interface TodoItemProps {
  */
 function TodoItem({ todo, deleteTodo, toggleComplete, toggleUrgent }: TodoItemProps) {
     return (
-        <li className={todo.isCompleted
+        <li key={todo.id} className={todo.isCompleted
             ? "todo-item-complete"
             : todo.isUrgent
                 ? "todo-item-urgent"
